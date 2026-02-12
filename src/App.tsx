@@ -47,39 +47,25 @@ const App: React.FC = () => {
     frame();
   };
 
-  const moveNoButton = (e?: React.MouseEvent | React.TouchEvent) => {
-    // Prevent default to stop clicks on mobile/desktop
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+ const moveNoButton = () => {
+  const parent = parentRef.current;
+  const btn = noBtnRef.current;
+  if (!parent || !btn) return;
 
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+  const p = parent.getBoundingClientRect();
+  const b = btn.getBoundingClientRect();
 
-    // Button dimensions (safe estimate including padding/shadow)
-    const btnWidth = 120; 
-    const btnHeight = 60;
-    const padding = 20; // Minimum distance from screen edge
+  const padding = 16;
 
-    // Calculate maximum allowed positions
-    const maxLeft = viewportWidth - btnWidth - padding;
-    const maxTop = viewportHeight - btnHeight - padding;
+  const maxX = p.width - b.width - padding;
+  const maxY = p.height - b.height - padding;
 
-    // Ensure we don't have negative ranges
-    const safeMaxLeft = Math.max(padding, maxLeft);
-    const safeMaxTop = Math.max(padding, maxTop);
+  const x = padding + Math.random() * Math.max(0, maxX - padding);
+  const y = padding + Math.random() * Math.max(0, maxY - padding);
 
-    // Generate random position within safe bounds
-    // Range: [padding, safeMaxLeft]
-    const newLeft = padding + Math.random() * (safeMaxLeft - padding);
-    const newTop = padding + Math.random() * (safeMaxTop - padding);
+  setNoPos({ x, y });
+};
 
-    setNoBtnPosition({
-      position: 'fixed',
-      left: newLeft,
-      top: newTop,
-    });
     
     hasMoved.current = true;
   };
