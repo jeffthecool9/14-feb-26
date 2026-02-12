@@ -109,9 +109,6 @@ const App: React.FC = () => {
               Will you be my Valentine?
             </h1>
             
-            <p className="text-gray-600 text-lg">
-              I promise chocolate, flowers, and bad jokes! 🌹
-            </p>
 
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 min-h-[120px]">
               {/* YES Button */}
