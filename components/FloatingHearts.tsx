@@ -1,46 +1,47 @@
-import React from 'react';
+import React, { useMemo } from "react";
+import { Heart } from "lucide-react";
 
-const FloatingHearts: React.FC = () => {
-  // Create a deterministic array of "random" hearts to avoid hydration mismatches
-  // In a real random scenario, we'd use useEffect to generate them client-side
-  const hearts = Array.from({ length: 20 }).map((_, i) => ({
-    id: i,
-    left: Math.random() * 100, // 0-100%
-    delay: Math.random() * 5, // 0-5s
-    duration: 5 + Math.random() * 5, // 5-10s
-    size: 10 + Math.random() * 30, // 10-40px
-  }));
-
-  return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      {hearts.map((heart) => (
-        <div
-          key={heart.id}
-          className="absolute text-pink-300 opacity-40 animate-pulse"
-          style={{
-            left: `${heart.left}%`,
-            bottom: '-50px',
-            fontSize: `${heart.size}px`,
-            animation: `float ${heart.duration}s linear infinite`,
-            animationDelay: `${heart.delay}s`,
-            transform: 'translateY(100vh)', // Start below screen
-          }}
-        >
-          <style dangerouslySetInnerHTML={{
-            __html: `
-              @keyframes float {
-                0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
-                10% { opacity: 0.5; }
-                90% { opacity: 0.5; }
-                100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
-              }
-            `
-          }} />
-          ❤️
-        </div>
-      ))}
-    </div>
-  );
+type HeartItem = {
+  id: string;
+  left: number;
+  top: number;
+  size: number;
+  duration: number;
+  delay: number;
+  opacity: number;
 };
 
-export default FloatingHearts;
+const FloatingHearts: React.FC = () => {
+  const hearts = useMemo<HeartItem[]>(() => {
+    const count = 14;
+    return Array.from({ length: count }).map((_, i) => ({
+      id: `h-${i}`,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      size: 14 + Math.random() * 26,
+      duration: 6 + Math.random() * 8,
+      delay: Math.random() * 3,
+      opacity: 0.12 + Math.random() * 0.18,
+    }));
+  }, []);
+
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {hearts.map((h) => (
+        <div
+          key={h.id}
+          className="absolute"
+          style={{
+            left: `${h.left}%`,
+            top: `${h.top}%`,
+            opacity: h.opacity,
+            animation: `floaty ${h.duration}s ease-in-out ${h.delay}s infinite`,
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <Heart
+            style={{ width: h.size, height: h.size }}
+            className="text-rose-400 fill-rose-300"
+          />
+        </div>
+      ))}
