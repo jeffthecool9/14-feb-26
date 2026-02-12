@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { Heart } from "lucide-react";
 
 type HeartItem = {
   id: string;
@@ -18,7 +17,7 @@ const FloatingHearts: React.FC = () => {
       id: `h-${i}`,
       left: Math.random() * 100,
       top: Math.random() * 100,
-      size: 14 + Math.random() * 26,
+      size: 10 + Math.random() * 18,
       duration: 6 + Math.random() * 8,
       delay: Math.random() * 3,
       opacity: 0.12 + Math.random() * 0.18,
@@ -39,9 +38,19 @@ const FloatingHearts: React.FC = () => {
             transform: "translate(-50%, -50%)",
           }}
         >
-          <Heart
-            style={{ width: h.size, height: h.size }}
-            className="text-rose-400 fill-rose-300"
-          />
+          <span style={{ fontSize: h.size, lineHeight: 1 }}>❤️</span>
         </div>
       ))}
+
+      <style>{`
+        @keyframes floaty {
+          0%   { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+          50%  { transform: translate(-50%, -50%) translateY(-18px) rotate(10deg); }
+          100% { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default FloatingHearts;
