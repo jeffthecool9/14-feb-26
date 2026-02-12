@@ -1,72 +1,79 @@
-import React, { useState, useEffect, useRef } from 'react';
-import confetti from 'canvas-confetti';
-import { Heart, Calendar, Sparkles } from 'lucide-react';
-import FloatingHearts from './components/FloatingHearts';
-import { Position } from './types';
+import React, { useRef, useState } from "react";
+import confetti from "canvas-confetti";
+import { Heart, Calendar, Sparkles } from "lucide-react";
+import FloatingHearts from "./components/FloatingHearts";
+
+type NoBtnPosition =
+  | { mode: "static" }
+  | { mode: "fixed"; top: number; left: number };
 
 const App: React.FC = () => {
-  const [accepted, setAccepted] = useState<boolean>(false);
-  const [noBtnPosition, setNoBtnPosition] = useState<Position>({
-    position: 'static',
-    top: 'auto',
-    left: 'auto',
-  });
-  
-  // Ref to track if the button has moved at least once to switch to absolute positioning
+  const [accepted, setAccepted] = useState(false);
+  const [noBtnPos, setNoBtnPos] = useState<NoBtnPosition>({ mode: "static" });
+
+  // If you ever want "only start running after first hover", keep this.
   const hasMoved = useRef(false);
+
+  const triggerConfetti = () => {
+    const duration = 2500;
+    const end = Date.now() + duration;
+
+    const frame = () => {
+      confetti({
+        particleCount: 6,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: ["#ff69b4", "#ff1493", "#ffffff"],
+      });
+      confetti({
+        particleCount: 6,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: ["#ff69b4", "#ff1493", "#ffffff"],
+      });
+
+      if (Date.now() < end) requestAnimationFrame(frame);
+    };
+
+    frame();
+  };
 
   const handleYesClick = () => {
     setAccepted(true);
     triggerConfetti();
   };
 
-  const triggerConfetti = () => {
-    const duration = 3000;
-    const end = Date.now() + duration;
+  const moveNoButton = (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
-    const frame = () => {
-      confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#ff69b4', '#ff1493', '#ffffff']
-      });
-      confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#ff69b4', '#ff1493', '#ffffff']
-      });
+    // Use real button size (if available). Otherwise fall back.
+    const btn = document.getElementById("no-btn");
+    const rect = btn?.getBoundingClientRect();
 
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-    frame();
-  };
+    const btnWidth = rect?.width ?? 130;
+    const btnHeight = rect?.height ?? 58;
 
- const moveNoButton = () => {
-  const parent = parentRef.current;
-  const btn = noBtnRef.current;
-  if (!parent || !btn) return;
+    const padding = 16;
 
-  const p = parent.getBoundingClientRect();
-  const b = btn.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
 
-  const padding = 16;
+    // Keep it inside viewport (and avoid landing under the top bar)
+    const minLeft = padding;
+    const minTop = padding + 10;
 
-  const maxX = p.width - b.width - padding;
-  const maxY = p.height - b.height - padding;
+    const maxLeft = Math.max(minLeft, vw - btnWidth - padding);
+    const maxTop = Math.max(minTop, vh - btnHeight - padding);
 
-  const x = padding + Math.random() * Math.max(0, maxX - padding);
-  const y = padding + Math.random() * Math.max(0, maxY - padding);
+    const left = minLeft + Math.random() * (maxLeft - minLeft);
+    const top = minTop + Math.random() * (maxTop - minTop);
 
-  setNoPos({ x, y });
-};
-
-    
+    setNoBtnPos({ mode: "fixed", left, top });
     hasMoved.current = true;
   };
 
@@ -76,25 +83,22 @@ const App: React.FC = () => {
 
       {/* Main Card */}
       <div className="z-10 w-full max-w-md bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border-4 border-white transform transition-all hover:scale-[1.02] duration-300">
-        
         {/* Header Icon */}
         <div className="flex justify-center mb-6">
-          <div className={`p-4 rounded-full bg-pink-100 ${!accepted ? 'floating' : ''}`}>
-             {accepted ? (
-                <Sparkles className="w-12 h-12 text-yellow-500 animate-pulse" />
-             ) : (
-                <Heart className="w-12 h-12 text-rose-500 fill-rose-500" />
-             )}
+          <div className={`p-4 rounded-full bg-pink-100 ${!accepted ? "floating" : ""}`}>
+            {accepted ? (
+              <Sparkles className="w-12 h-12 text-yellow-500 animate-pulse" />
+            ) : (
+              <Heart className="w-12 h-12 text-rose-500 fill-rose-500" />
+            )}
           </div>
         </div>
 
         {!accepted ? (
-          /* Question Section */
           <div className="text-center space-y-8">
             <h1 className="font-handwriting text-5xl md:text-6xl text-rose-600 font-bold drop-shadow-sm leading-tight">
               Will you be my Valentine?
             </h1>
-            
 
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 min-h-[120px]">
               {/* YES Button */}
@@ -108,32 +112,38 @@ const App: React.FC = () => {
                 <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:animate-shine" />
               </button>
 
-              {/* NO Button */}
+              {/* NO Button (dodges but never vanishes) */}
               <button
+                id="no-btn"
                 onMouseEnter={moveNoButton}
+                onMouseMove={moveNoButton}     // makes it harder to “trap”
                 onTouchStart={moveNoButton}
                 onClick={moveNoButton}
                 style={
-                   noBtnPosition.position === 'fixed'
-                    ? { position: 'fixed', top: noBtnPosition.top, left: noBtnPosition.left, zIndex: 50 }
-                    : {}
+                  noBtnPos.mode === "fixed"
+                    ? {
+                        position: "fixed",
+                        top: noBtnPos.top,
+                        left: noBtnPos.left,
+                        zIndex: 9999, // ensure it stays above the card
+                      }
+                    : undefined
                 }
-                className={`px-8 py-4 bg-gray-400 text-white text-xl font-bold rounded-full shadow-md transition-all duration-200 w-full md:w-auto cursor-pointer ${noBtnPosition.position === 'fixed' ? 'runaway-btn' : ''}`}
+                className={`px-8 py-4 bg-gray-400 hover:bg-gray-500 text-white text-xl font-bold rounded-full shadow-md transition-all duration-200 w-full md:w-auto cursor-pointer ${
+                  noBtnPos.mode === "fixed" ? "runaway-btn" : ""
+                }`}
               >
                 No
               </button>
             </div>
           </div>
         ) : (
-          /* Success Section */
           <div className="text-center space-y-6 animate-in fade-in zoom-in duration-500">
             <h1 className="font-handwriting text-5xl md:text-6xl text-rose-600 font-bold">
               Congratulations!
             </h1>
-            <h2 className="text-2xl font-bold text-gray-800">
-              It's a Date! ❤️
-            </h2>
-            
+            <h2 className="text-2xl font-bold text-gray-800">It's a Date! ❤️</h2>
+
             <div className="bg-pink-50 p-6 rounded-2xl border-2 border-pink-200 flex flex-col items-center gap-3">
               <Calendar className="w-10 h-10 text-rose-500 mb-2" />
               <p className="text-lg text-gray-700">Your Valentine's date is booked for:</p>
@@ -141,10 +151,8 @@ const App: React.FC = () => {
                 Saturday, 14 Feb 2026
               </p>
             </div>
-            
-            <p className="text-gray-500 italic">
-              See you there! (Don't be late) 😉
-            </p>
+
+            <p className="text-gray-500 italic">See you there! (Don't be late) 😉</p>
           </div>
         )}
       </div>
