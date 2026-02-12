@@ -45,3 +45,16 @@ const FloatingHearts: React.FC = () => {
           />
         </div>
       ))}
+
+      <style>{`
+        @keyframes floaty {
+          0%   { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+          50%  { transform: translate(-50%, -50%) translateY(-18px) rotate(10deg); }
+          100% { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default FloatingHearts;
