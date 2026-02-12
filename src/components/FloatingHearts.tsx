@@ -1,0 +1,47 @@
+import React, { useMemo } from "react";
+import { Heart } from "lucide-react";
+
+type HeartItem = {
+  id: string;
+  left: number;
+  top: number;
+  size: number;
+  duration: number;
+  delay: number;
+  opacity: number;
+};
+
+const FloatingHearts: React.FC = () => {
+  const hearts = useMemo<HeartItem[]>(() => {
+    const count = 14;
+    return Array.from({ length: count }).map((_, i) => ({
+      id: `h-${i}`,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      size: 14 + Math.random() * 26,
+      duration: 6 + Math.random() * 8,
+      delay: Math.random() * 3,
+      opacity: 0.12 + Math.random() * 0.18,
+    }));
+  }, []);
+
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {hearts.map((h) => (
+        <div
+          key={h.id}
+          className="absolute"
+          style={{
+            left: `${h.left}%`,
+            top: `${h.top}%`,
+            opacity: h.opacity,
+            animation: `floaty ${h.duration}s ease-in-out ${h.delay}s infinite`,
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <Heart
+            style={{ width: h.size, height: h.size }}
+            className="text-rose-400 fill-rose-300"
+          />
+        </div>
+      ))}
