@@ -1,1 +1,4 @@
-export const CONFESSION_TEXT = `Hey again, if you still reading this right now, I just wanted to say that I tried chasing you with showing my vulnerability and weakness. I lost a very critical opportunity of losing someone like you, I think its not the right choice, instead of liking you, Its more like a test for you, and you might feel it that way. I know I cant turn back time, I will keep you in my world for some period, eventho we cant meet in the real world, I will see you in my world`;
+export const CONFESSION_TEXT = `山水不扰，各自远行。
+那一段同行，我心存感激。
+失去你，我才看清自己。
+若命运允许，高处再见`;
